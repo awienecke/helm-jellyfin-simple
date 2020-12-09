@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jellyfin
+spec:
+  template:
+    metadata:
+      name: jellyfin-app
+      labels: 
+        name: jellyfin-app
+    spec:
+      volumes:
+        - name: jmedia
+          persistentVolumeClaim:
+            claimName: jellyfin-media-claim
+        - name: jconfig
+          persistentVolumeClaim:
+            claimName: jellyfin-config-claim
+      containers:
+      - name: jellyfin
+        image: linuxserver/jellyfin:latest
+        env:
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        - name: TZ
+          value: "{{ .Values.timezone }}"
+        volumeMounts:
+        - name: jconfig
+          mountPath: "/config/"
+        - name: jmedia
+          mountPath: "/media/"
+  replicas: 1 
+  selector:
+    matchLabels:
+      name: jellyfin-app
